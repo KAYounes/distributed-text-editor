@@ -1,14 +1,9 @@
-import socket, sys
+import socket, sys, pickle
 from _thread import *
+from player import Player
 
-def str_to_int(position) : # "(x, y)"
-    position = position.split(",")
-    return int(position[0]), int(position[1])
 
-def int_to_str(position):
-    return str(position[0]) + ',' + str(position[1])
-
-player_positions = [(0,0), (100,100)] # p1 position, p2 position
+players = [Player(0, 0, 50, 50, (255,0,0)), Player(100, 100, 50, 50, (0,0,255))]
 
 PLAYER1 = 0
 PLAYER2 = 1
@@ -30,15 +25,15 @@ print("Server is up and running, Waiting for connection...")
 
 
 def client_thread(connection, current_player) :
-    message = int_to_str(player_positions[current_player])
-    connection.send(str.encode(message))
+    
+    connection.send(pickle.dumps(players[current_player]))
     
     reply = ""
 
     while True :
         try :
-            data = str_to_int(connection.recv(2048).decode())
-            player_positions[current_player] = data
+            data = pickle.loads(connection.recv(2048))
+            players[current_player] = data
             ## Old code
             # data = connection.recv(2048) # number of bytes of data
             # reply = data.decode("utf-8") # we have to decode the information
@@ -48,14 +43,14 @@ def client_thread(connection, current_player) :
                 break
             else :
                 if current_player : # == 1
-                    reply = player_positions[0] # send the position of the other player
+                    reply = players[0] # send the position of the other player
                 else:
-                    reply = player_positions[1]
+                    reply = players[1]
 
                 print("Received: ", data)
                 print("Sending: ", reply)
 
-            connection.sendall(str.encode(int_to_str(reply))) # encode data
+            connection.sendall(pickle.dumps(reply)) # encode data
         
         except Exception as error:
             print("We should not be here: ", error)
