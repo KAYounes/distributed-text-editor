@@ -70,6 +70,14 @@ function newLine(){
     return line.content.length
   };
 
+  line.insertText = function(text, index = this.getLength()){
+    line.content.splice(index, 0, ...text)
+  }
+
+  line.removeText = function(start, count){
+    return this.content.splice(start, count)
+  }
+
 
   return line;
 }
@@ -86,38 +94,80 @@ function newDocument(){
     return this.lines.length;
   }
 
-  // doc.insertNewLine = function (){
-  //   this.lines.push(newLine());
-  // }
-
-  doc.getLastLine = function(){
-    return this.lines[this.getLength() - 1];
+  doc.getLine = function(lineNumber = this.getLength()){
+    return this.lines[lineNumber]
   }
 
-  doc.insertChar = function(char){
-    const lastLine = this.getLastLine();
-    
-    if(typeof(char) === 'string'){
-      if(char === '\n'){
-        // console.log("\n Inserted New Line")
-        this.insertNewLine()
-      }
-      else{
-        // console.log("\n Inserted char")
-        lastLine.content.push(char)
-      }
-      
-    }else{
-      throw "Char is not a string";
-    }
+  doc.insertTextToLine = function(lineNumber = this.getLength(), text, index){
+    return this.lines[lineNumber].insertText(text, index)
   }
 
-  // doc.checkForNewLine = function(text){
-
-  // }
+  doc.getLineLength = function(lineNumber = this.getLength()){
+    return this.lines[lineNumber].getLength()
+  }
 
   doc.insertNewLine = function(index = this.getLength()){
     doc.lines.splice(index, 0, newLine())
+  }
+
+  doc.removeTextFromLine = function(lineNumber, start, count){
+    return this.getLine(lineNumber).removeText(start, count);
+  }
+
+
+  doc.insertText2 = function(index, text){
+    let textArray = text.split('\n');
+    let newLineCount = textArray.length - 1;
+    let [lineNumber, cursor] = this.getLineNumberFromIndex(index);
+
+    // [text, text2, ''] // NLC = 2
+    // ABCD
+    // ABCtext
+    // text2
+    // D
+
+    text = textArray.shift();
+
+    // Inerting Text
+    if(text){
+      this.insertTextToLine(lineNumber, text, cursor);
+      cursor += text.length
+    }
+    
+    while(newLineCount){
+      let lineLength = this.getLineLength(lineNumber)
+
+      if(lineLength === cursor){
+        this.insertNewLine(lineNumber + 1);
+      }
+      else if(cursor === 0){
+        this.insertNewLine(lineNumber);
+      }
+      else if(cursor <= lineLength/2){
+        let removedText = this.removeTextFromLine(lineNumber, 0, cursor)
+        this.insertNewLine(lineNumber);
+        this.insertTextToLine(lineNumber, removedText, 0)
+      }
+      else if(cursor > lineLength/2){
+        let removedText = this.removeTextFromLine(lineNumber, cursor, lineLength - cursor)
+        this.insertNewLine(lineNumber + 1);
+        this.insertTextToLine(lineNumber + 1, removedText, 0)
+      }
+
+      lineNumber ++;
+      cursor = 0;
+      text = textArray.shift();
+
+      if(text){
+        this.insertTextToLine(lineNumber, text, cursor);
+        cursor += text.length
+      }
+
+      newLineCount --;
+    }
+
+    doc1.printLines();
+
   }
 
   doc.insertText = function(index, text){
@@ -199,71 +249,13 @@ function newDocument(){
   }
 
   doc.getLineNumberFromIndex = function(index){
-    // let lineNumber = 0;
-    // let lineLength = this.lines[0].getLength()
-    // console.log("(4) lineLength is: ", lineLength, ", index is:", index)
-    
-    // while(index > lineLength){
-    //   index -= lineLength + 1;
-    //   lineNumber ++;
-    //   // console.log("LooP")
-    //   console.log("(4) lineNumber is:", lineNumber)
-    //   lineLength = this.lines[lineNumber].getLength();
-    //   console.log("(4) index now:", index, ", lineNumber is:", lineNumber, ", lineLength is:", lineLength)
-    // }
-
     for(let i = 0; i < this.getLength(); i++){
+      // console.log(index, this.lines[i].getLength(), i)
       if(index <= this.lines[i].getLength()){
         return [i, index];
       }
 
       index -= this.lines[i].getLength() + 1;
-    }
-
-    // return lineNumber + 1
-  }
-  // doc.insertText = function(index, text){
-  //   // console.log(`Next Empty Slot: ${this.nextEmptySlot}, Index: ${index}, Text: ${text}`)
-  //   const textLength = text.length;
-
-  //   if(index === this.nextEmptySlot) {
-  //     // console.log(`Text Length: ${textLength}`)
-      
-  //     if(textLength - 1){
-  //     //  console.log("\nInsert Text")
-  //      this.insertString(text);
-  //     }else{
-  //     //  console.log("\nInsert Char")
-  //      this.insertChar(text)
-  //     }
-  //     this.nextEmptySlot += textLength;
-  //     // console.log("\nNext Empty Slot")
-  //     console.log(this.nextEmptySlot)
-  //  }
-  //  else{
-  //    console.log(`Else Part with: index ${index}`)
-  //    for(let line of this.lines){
-  //      console.log(`index: ${index}, line length: ${line.getLength()}`)
-  //      if(index < line.getLength()){
-  //        line.content.splice(index, 0, text)
-  //     this.nextEmptySlot += textLength;
-
-  //        break;
-  //      }
-  //      index -= line.getLength()
-  //    }
-
-     
-  //  }
-  // }
-
-  doc.getIndexInLine = function(index){
-    for(let line of this.lines){
-      if(line.getLength() < index){
-        index -= line.getLength()
-      }else{
-        return 
-      }
     }
   }
 
@@ -279,16 +271,12 @@ function newDocument(){
     }
   }
 
-  doc.insertString = function(string){
-    for(let char of string){
-      this.insertChar(char);
-    }
-  }
-
   doc.printLines = function() {
+    console.log('\n----------')
     for(let line of this.lines){
       console.log(line.content);
     }
+    console.log('----------\n')
   }
 
   doc.lineToString = function(lineNumber){
@@ -315,9 +303,40 @@ function newDocument(){
     console.log(this.asString());
     return;
   }
-
-
+  
   return doc;
+
+  // doc.insertNewLine = function (){
+  //   this.lines.push(newLine());
+  // }
+
+  // doc.getLastLine = function(){
+  //   return this.lines[this.getLength() - 1];
+  // }
+
+  // doc.insertChar = function(char){
+  //   const lastLine = this.getLastLine();
+    
+  //   if(typeof(char) === 'string'){
+  //     if(char === '\n'){
+  //       // console.log("\n Inserted New Line")
+  //       this.insertNewLine()
+  //     }
+  //     else{
+  //       // console.log("\n Inserted char")
+  //       lastLine.content.push(char)
+  //     }
+      
+  //   }else{
+  //     throw "Char is not a string";
+  //   }
+  // }
+
+  // doc.insertString = function(string){
+  //   for(let char of string){
+  //     this.insertChar(char);
+  //   }
+  // }
 }
 
 
@@ -356,7 +375,7 @@ function handler1(delta, oldDelta){
 
       else if(operation === 'insert'){
         // console.log("\n\nInsert Text Called")
-        doc1.insertText(index, operationValue)
+        doc1.insertText2(index, operationValue)
         // for(let char of operationValue){
           // if(char === '\n'){
           //   doc1.insertNewLine()
