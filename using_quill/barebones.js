@@ -243,7 +243,7 @@ function createDocumentObject(){
   }
 
   doc.deleteText = function(start, count){
-    let debug = true;
+    let debug = false;
     const startLine = this.getLineNumber(start)
     const endLine = this.getLineNumber(start + count)
     let span = endLine - startLine + 1;
@@ -326,7 +326,7 @@ function createDocumentObject(){
       }else{
         debug && console.log("[2]")
         this.removeTextFromLine(currentLine, lineStart, count)
-        count -= lineLength - lineStart
+        count -= lineLength - lineStart + 1
         currentLine ++;
       }
       
@@ -443,12 +443,18 @@ function onTextChangeHandler(delta, oldDelta){
       // console.log(`insert ${instruction.insert} at ${start}`)
       firstDocument.insertText(start, instruction.insert)
       start += instruction.insert.length
+      console.log(`\nInsert '${instruction.insert === '\n' ? "\\n" : instruction.insert}' at index ${start - 1}`)
+      firstDocument.logContents()
+      console.log("--\n")
     }
     else if(instruction.delete){
       // console.log(`delete - start ${start}, count ${instruction.delete}`)
       count = instruction.delete
       // console.log({start, count})
       firstDocument.deleteText(start, count)
+      console.log(`\nDelete from index ${start - 1} to ${start + instruction.insert - 1}`)
+      firstDocument.logContents()
+      console.log("--\n")
     }
   }
 }
