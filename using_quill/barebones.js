@@ -185,6 +185,12 @@ function createDocumentObject(){
     let newLineCount = textArray.length - 1;
     // let [lineNumber, cursor] = this.getLineNumberFromIndex(index);
     let lineNumber = this.getLineNumber(index);
+
+    if(lineNumber === undefined){
+      this.insertNewLine(this.getNumberofLines());
+      lineNumber = this.getLineNumber(index);
+      newLineCount = newLineCount > 0 ? newLineCount - 1 : 0;
+    }
     // console.log({lineNumber})
     let currentIndex = this.getIndexInLine(lineNumber, index);
 
@@ -235,14 +241,15 @@ function createDocumentObject(){
   }
 
   doc.deleteTextFromDocument = function(startIndex, deleteCount){
-    let debug = false;
+    let debug = true;
     const startLine = this.getLineNumber(startIndex)
     const endLine = this.getLineNumber(startIndex + deleteCount)
     let span = endLine - startLine + 1;
     let currentLine = startLine;
     let lineLength;
 
-    debug && console.log("\nNew Call", {startLine, endLine, span, currentLine, deleteCount})
+    // debug && console.log("\nNew Call", {startIndex, deleteCount})
+    debug && console.log("\n", {startIndex, deleteCount, startLine, endLine, span, currentLine, deleteCount})
 
 
     while(span > 2){   
@@ -251,7 +258,7 @@ function createDocumentObject(){
       this.removeLine(currentLine + 1)
       span--;
     }
-    debug && this.printToConsole()
+    // debug && this.printToConsole()
     // let line = this.getLine(currentLine);
   
     let lineStart = this.getIndexInLine(currentLine, startIndex)
@@ -269,54 +276,130 @@ function createDocumentObject(){
       }
 
       span--;
+    }else{
+      // let deletedCount;
+      // lineLength = this.getLineLength(currentLine)
+
+      // if(lineLength === 0){ // first line is empty
+      //   debug && console.log("[1]")
+      //   debug && console.log({deleteCount, currentLine, lineStart, lineLength})
+      //   deleteCount --;
+      //   lineStart = -1
+      //   this.removeLine(currentLine)
+      // }else if(lineStart === 0){ // deleting whole of first line
+      //   debug && console.log("[2]")
+      //   deleteCount -= lineLength + 1 // added + 1 to fix ABC,(empty),123 -> (Empty),123;
+      //   lineStart = -1
+      //   this.removeLine(currentLine)
+      // }else if(lineStart < lineLength) { // deleteing part of first line
+      //   debug && console.log("[3]")
+      //   deletedCount = lineLength - lineStart
+      //   this.removeTextFromLine(currentLine, lineStart, deletedCount)
+      //   currentLine++;
+      //   deleteCount -= deletedCount + 1
+      // }else{
+      //   debug && console.log("[4]")
+      //   currentLine ++;        
+      //   deleteCount --;
+      // }
+      
+      
+      // // lineStart = deleteCount
+      // lineLength = this.getLineLength(currentLine)
+      // debug && console.log({deleteCount, currentLine, lineStart, lineLength})
+      // debug && this.printToConsoleAsTable()
+
+      // // if(deleteCount !== 0){
+      //   if(lineLength === 0){
+      //     debug && console.log("[5]")
+      //     this.removeLine(currentLine)
+      //     // deleteCount --;
+      //   }else if(deleteCount === lineLength){
+      //     debug && console.log("[6]")
+      //     // deleteCount -= lineLength;
+      //     this.removeTextFromLine(currentLine, 0, this.getLineLength(currentLine))
+      //   }else if(lineStart === -1){
+      //    debug && console.log("[8]")
+      //   this.removeTextFromLine(currentLine, 0, deleteCount)
+      //  }else{
+      //   debug && console.log("[7]")
+        
+      //   let transferedText = this.removeTextFromLine(currentLine, deleteCount, lineLength - deleteCount)
+      //   this.removeLine(currentLine)
+      //   currentLine --;
+      //   lineLength = this.getLineLength(currentLine)
+      //   this.insertToLine(currentLine, transferedText, lineLength)
+      // // }
+
+    // }
+    let firstLine = this.getLineAsString(currentLine)
+    let secondLine = this.getLineAsString(currentLine + 1)
+    let startOfDeleteion = startIndex
+    // console.log(firstLine + secondLine)
+    // console.log({firstLine, secondLine, deleteCount})
+
+    let lineStart = this.getIndexInLine(currentLine, startIndex)
+    let line = [...(firstLine + secondLine)]
+
+    line.splice(lineStart, deleteCount - 1)
+    this.removeLine(currentLine)
+    this.removeLine(currentLine)    
+
+    if(this.getNumberofLines() !== 1){
+      this.insertNewLine(currentLine)
+    }
+
+    let lineAsString = line.reduce(function(string, char){return string += char}, '')
+    this.insertTextToDocument(startIndex - lineStart, lineAsString)
     }
 
 
-    if(span === 2){
-    debug && console.log("[span === 2] is True", {lineStart, lineLength, deleteCount})
+    // if(span === 2){
+    // debug && console.log("[span === 2] is True", {lineStart, lineLength, deleteCount})
     
-    if(deleteCount > 0){
-      debug && console.log("[Count > 0] is true")
+    // if(deleteCount > 0){
+    //   debug && console.log("[Count > 0] is true")
       
-      lineLength = this.getLineLength(currentLine)
+    //   lineLength = this.getLineLength(currentLine)
 
-      debug && console.log("1.1", {lineLength, currentLine, lineStart, deleteCount})
+    //   debug && console.log("1.1", {lineLength, currentLine, lineStart, deleteCount})
       
-      if(lineStart === 0){
-        debug && console.log("[1]")
-        deleteCount -= lineLength + 1;
-        this.removeLine(currentLine);
-      }else if(lineLength !== lineStart){
-        debug && console.log("[2]")
-        this.removeTextFromLine(currentLine, lineStart, deleteCount)
-        deleteCount -= lineLength - lineStart + 1
-        currentLine ++;
-      }else{
-        currentLine ++;
-      }
+    //   if(lineStart === 0){
+    //     debug && console.log("[1]")
+    //     deleteCount -= lineLength + 1;
+    //     this.removeLine(currentLine);
+    //   }else if(lineLength !== lineStart){
+    //     debug && console.log("[2]")
+    //     this.removeTextFromLine(currentLine, lineStart, deleteCount)
+    //     // deleteCount -= lineLength - lineStart + 1 // AB[C 123 ]GG
+    //     deleteCount -= lineLength - lineStart
+    //     currentLine ++;
+    //   }else{
+    //     currentLine ++;
+    //   }
       
-      lineLength = this.getLineLength(currentLine)
-      debug && console.log("1.2", {lineLength, currentLine, lineStart, deleteCount})
-      debug && this.printToConsole()
+    //   lineLength = this.getLineLength(currentLine)
+    //   debug && console.log("1.2", {lineLength, currentLine, lineStart, deleteCount})
+    //   debug && this.printToConsole()
       
-      if(deleteCount === lineLength){
-          debug && console.log("[3]")
-        deleteCount -= lineLength + 1;
-        this.removeTextFromLine(currentLine, 0, lineLength)
+    //   if(deleteCount === lineLength){
+    //       debug && console.log("[3]")
+    //     deleteCount -= lineLength + 1;
+    //     this.removeTextFromLine(currentLine, 0, lineLength)
 
-      }else if(deleteCount > 0){
-          debug && console.log("[4]")
-        this.removeTextFromLine(currentLine, 0, deleteCount)
-        lineLength = this.getLineLength(currentLine)
-        let remainingItems = this.removeTextFromLine(currentLine, 0, lineLength)
-          debug && console.log("1.3", {remainingItems})
-        this.removeLine(currentLine)
-        currentLine --;
-        lineLength = this.getLineLength(currentLine)
-        this.insertToLine(currentLine, remainingItems, lineLength)
-        }
-      }
-    }
+    //   }else if(deleteCount > 0){
+    //       debug && console.log("[4]")
+    //     this.removeTextFromLine(currentLine, 0, deleteCount)
+    //     lineLength = this.getLineLength(currentLine)
+    //     let remainingItems = this.removeTextFromLine(currentLine, 0, lineLength)
+    //       debug && console.log("1.3", {remainingItems})
+    //     this.removeLine(currentLine)
+    //     currentLine --;
+    //     lineLength = this.getLineLength(currentLine)
+    //     this.insertToLine(currentLine, remainingItems, lineLength)
+    //     }
+    //   }
+    // }
   }
 
 
@@ -397,7 +480,7 @@ firstEditor.on("text-change", onTextChangeHandler)
 let firstEditorDeltaStack = [];
 
 function onTextChangeHandler(delta, oldDelta){
-  // console.log(delta)
+  console.log(delta)
   let operation = delta.ops
   // console.log({delta, oldDelta})
   firstEditorDeltaStack.push(operation);  
@@ -412,24 +495,24 @@ function onTextChangeHandler(delta, oldDelta){
     }
     else if(instruction.retain){
       // console.log(`Update start to ${instruction.retain}`)
-      start = instruction.retain
+      start += instruction.retain
     }
     else if(instruction.insert){
       // console.log(`insert ${instruction.insert} at ${start}`)
+      // console.log(`\nInsert '${instruction.insert === '\n' ? "\\n" : instruction.insert}' at index ${start - 1}`)
       firstDocument.insertTextToDocument(start, instruction.insert)
       start += instruction.insert.length
-      console.log(`\nInsert '${instruction.insert === '\n' ? "\\n" : instruction.insert}' at index ${start - 1}`)
       firstDocument.printToConsoleAsTable()
-      console.log("--\n")
+      // console.log("--\n")
     }
     else if(instruction.delete){
       // console.log(`delete - start ${start}, count ${instruction.delete}`)
       count = instruction.delete
       // console.log({start, count})
-      console.log(`\nDelete from index ${start === 0 ? 0 : start - 1} to ${start + instruction.delete - 1} (fron line ${firstDocument.getLineNumber(start)} to ${firstDocument.getLineNumber(start + count)})`)
+      // console.log(`\nDelete from index ${start === 0 ? 0 : start - 1} to ${start + instruction.delete - 1} (fron line ${firstDocument.getLineNumber(start)} to ${firstDocument.getLineNumber(start + count)})`)
       firstDocument.deleteTextFromDocument(start, count)
       firstDocument.printToConsoleAsTable()
-      console.log("--\n")
+      // console.log("--\n")i
     }
   }
 }
