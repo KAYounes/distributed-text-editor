@@ -43,6 +43,11 @@
             <main id="quill-container-2"></main>
         </div>
     </section>
+    <script type="text/javascript">
+        window.onbeforeunload = function(event){
+            return confirm("Confirm refresh");
+        };
+    </script>
         
     <script src="quill\quill\quill.js"></script>
     <script src="barebones.js"></script>
