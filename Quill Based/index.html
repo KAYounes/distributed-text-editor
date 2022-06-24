@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    
+    <link href="quill\quill\quill.snow.css" rel="stylesheet">
+    <style>
+        html{
+            height: 100%;
+            max-width: 100vw;
+        }
+        body{
+            height: 100%;
+        }
+        section{
+            display: flex;
+            gap: 10px;
+            max-width: 100vw;
+        }
+        main{
+            height: 200px;
+            max-width: 100%;
+            overflow: hidden;
+            white-space: pre;
+            /* max-width: 10vw;
+            width: 10vw; */
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Quill</h1>
+    <h2>Open Console to see output</h2>
+
+    <section>
+        <div>
+            <main id="quill-container-1"></main>
+        </div>
+        <div>
+            <main id="quill-container-2"></main>
+        </div>
+    </section>
+    <script type="text/javascript">
+        window.onbeforeunload = function(event){
+            return confirm("Confirm refresh");
+        };
+    </script>
+        
+    <script src="quill\quill\quill.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
