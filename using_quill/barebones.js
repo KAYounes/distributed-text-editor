@@ -92,6 +92,19 @@ function handler2(delta, oldDelta){
 
 /*************************************************** Objects ***************************************************/
 
+//// Character Object
+function createCharacterObject()
+{
+
+  const character = {}
+
+  character.owner = undefined;
+  character.position = undefined;
+  character.value = undefined;
+
+  return character
+}
+
 //// Line Object
 function createLineObject(){
   const line = {};
@@ -115,6 +128,7 @@ function createLineObject(){
   line.convertToString = function(){
     return this.content.join('');
   }
+
 
   return line;
 }
@@ -423,7 +437,7 @@ function createDocumentObject(){
     for(let lineNumber in this.lines)
     {
       lineAsString = this.convertLineToString(lineNumber)
-      lines.push(str === '' ? "(empty)": str)
+      lines.push(lineAsString === '' ? "(empty)": lineAsString)
     }
 
     console.table(lines)
@@ -434,12 +448,7 @@ function createDocumentObject(){
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-function createCharacterObject(){
-  const character = {}
-  character.owner = undefined;
-  character.position = undefined;
-  character.value = undefined;
-}
+
 
 
 
