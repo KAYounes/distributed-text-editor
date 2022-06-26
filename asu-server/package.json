@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "mongoose": "^6.4.0",
     "node-fetch": "^2.6.1",
     "socket.io": "^4.5.1",
     "update-notifier": "^6.0.0"
